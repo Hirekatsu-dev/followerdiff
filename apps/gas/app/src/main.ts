@@ -1,4 +1,4 @@
-import 'google-apps-script'
+import 'google-apps-script';
 
 // 環境変数
 const TWITTER_API_KEY = PropertiesService.getScriptProperties().getProperty('TWITTER_API_KEY') || '';
@@ -29,10 +29,10 @@ function log(level: 'info' | 'warn' | 'error', message: string) {
 		return;
 	}
 
-	logSheet.appendRow([new Date(), level.toUpperCase(), message])
+	logSheet.appendRow([new Date(), level.toUpperCase(), message]);
 
 	if (logMaxRow < logSheet.getLastRow()) {
-		logSheet.deleteRow(2)
+		logSheet.deleteRow(2);
 	}
 }
 
@@ -46,11 +46,11 @@ class Follower {
 	) { }
 
 	static fromRow(row: string[]) {
-		new Follower(row[0], row[1], row[2], row[3])
+		return new Follower(row[0], row[1], row[2], row[3]);
 	}
 
 	toRow(): string[] {
-		return [this.twitterId, this.date, this.screenName, this.name]
+		return [this.twitterId, this.date, this.screenName, this.name];
 	}
 }
 
@@ -263,7 +263,53 @@ function getFollowerDiff(id: string, from: string, to: string): GetFollowerDiffI
 }
 
 function getFollowersAt(sheet: GoogleAppsScript.Spreadsheet.Sheet, date: string): Follower[] {
-	return [];
+	let minIndex = 2;
+	let maxIndex = sheet.getLastRow();
+	let found = false;
+
+	while (minIndex < maxIndex) {
+		const c = minIndex + (maxIndex - minIndex) / 2;
+		const d = sheet.getRange(c, 2).getDisplayValue();
+
+		if (d < date) {
+			minIndex = c + 1;
+		} else if (d === date) {
+			maxIndex = c;
+			found = true;
+		} else {
+			maxIndex = c - 1;
+		}
+	}
+
+	let result: Follower[] = [];
+
+	if (found) {
+		const rangeMinIndex = minIndex;
+		minIndex = 2;
+		maxIndex = sheet.getLastRow();
+		found = false;
+
+		while (minIndex < maxIndex) {
+			const c = minIndex + (maxIndex - minIndex) / 2;
+			const d = sheet.getRange(c, 2).getDisplayValue();
+
+			if (d < date) {
+				minIndex = c + 1;
+			} else if (d === date) {
+				minIndex = c;
+				found = true;
+			} else {
+				maxIndex = c - 1;
+			}
+		}
+
+		const rangeMaxIndex = minIndex;
+
+		const rows = sheet.getRange(rangeMinIndex, 1, rangeMaxIndex - rangeMinIndex + 1, 4).getDisplayValues();
+		result = rows.map(row => Follower.fromRow(row));
+	}
+
+	return result;
 }
 
 
@@ -359,7 +405,7 @@ function doGet(request: Request) {
 		} else if (result.status < 500) {
 			log('info', `[${ jobUuid }] GET ${ path }: finished with status ${ result.status }.`);
 		} else {
-			log('error', `[${ jobUuid }] GET ${ path }: finished with status ${ result.status }. response: ${ result }`);
+			log('error', `[${ jobUuid }] GET ${ path }: finished with status ${ result.status }. response: ${ JSON.stringify(result) }`);
 		}
 	}
 
