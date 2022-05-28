@@ -1,5 +1,5 @@
 <template>
-  <div class="tw-rounded-lg tw-border-t-blue-600 tw-shadow-md tw-flex tw-flex-col tw-items-start tw-space-y-4 tw-p-4"
+  <div class="tw-rounded-lg tw-border-t-sky-400 tw-shadow-md tw-flex tw-flex-col tw-items-start tw-space-y-4 tw-p-4"
     :style="{
       'border-top-style': 'solid',
       'border-top-width': '1rem'
@@ -29,7 +29,7 @@
       </div>
     </div>
     <div class="tw-w-full tw-flex tw-justify-center">
-      <button class="tw-rounded-lg tw-w-32 tw-bg-blue-600 disabled:tw-cursor-wait disabled:tw-bg-blue-700"
+      <button class="tw-rounded-lg tw-w-32 tw-bg-sky-400 disabled:tw-cursor-wait disabled:tw-bg-sky-600"
         :disabled="isLoading" @click="search">
         <span class="tw-font-bold tw-text-white">{{ isLoading ? '検索中...' : '比較する' }}</span>
       </button>
@@ -55,6 +55,10 @@ const props = defineProps<Props>();
 const { form } = toRefs(props);
 
 const search = async () => {
+  if (!form.value.validate()) {
+    return;
+  }
+
   try {
     isLoading.value = true;
     await props.onSearch(form.value);

@@ -1,7 +1,7 @@
 <template>
   <table class="tw-border-separate tw-border tw-overflow-hidden tw-rounded-lg tw-shadow-md"
     :style="{ 'border-spacing': 0, }">
-    <thead class="tw-bg-blue-600 tw-block">
+    <thead class="tw-bg-sky-400 tw-block">
       <FollowerDiffTableHeader />
     </thead>
     <tbody class="tw-block tw-overflow-auto">

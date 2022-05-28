@@ -3,7 +3,7 @@
     'min-width': '1200px',
     'min-height': '800px'
   }">
-    <FollowerDiffSearchFormView :form="form" :onSearch="executeSearch" />
+    <FollowerDiffSearchFormView :form="(form as FollowerDiffSearchForm)" :onSearch="executeSearch" />
     <FollowerDiffTable class="tw-overflow-auto" :items="followerDiffList" :loading="isLoading" />
   </div>
 </template>
@@ -25,7 +25,7 @@ const today = format(new Date(), 'yyyy-MM-dd');
 const query = router.currentRoute.value.query;
 
 const initFormFields = {
-  id: query['id']?.toString() ?? null,
+  id: query['id']?.toString() ?? '',
   from: query['from']?.toString() ?? today,
   to: query['to']?.toString() ?? today,
 };
