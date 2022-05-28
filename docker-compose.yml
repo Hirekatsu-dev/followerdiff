@@ -1,7 +1,18 @@
 version: '2'
 services:
+  frontend:
+    build: ./apps/frontend
+    ports:
+      - 3000:3000
+      - 6006:6006
+    volumes:
+      - ./apps/frontend/app:/app
+    stdin_open: true
+    tty: true
   gas:
     build: ./apps/gas
+    ports:
+      - 35357:35357
     tty: true
     volumes:
       - ./apps/gas/app:/app

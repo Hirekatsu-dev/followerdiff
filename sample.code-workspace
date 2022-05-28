@@ -1,0 +1,15 @@
+{
+    "folders": [
+        {
+            "name": "frontend",
+            "path": "apps/frontend/app"
+        },
+        {
+            "name": "gas",
+            "path": "apps/gas"
+        },
+    ],
+    "settings": {
+        "editor.formatOnSave": true
+    },
+}

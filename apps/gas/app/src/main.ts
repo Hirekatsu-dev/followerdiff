@@ -12,7 +12,7 @@ const logMaxRow = 1000;
 
 // ログ
 function log(level: 'info' | 'warn' | 'error', message: string) {
-	switch(level) {
+	switch (level) {
 		case 'info':
 			console.log(message);
 			break;
@@ -103,7 +103,7 @@ class TwitterClient {
 
 		do {
 			const response: GoogleAppsScript.URL_Fetch.HTTPResponse = UrlFetchApp.fetch(
-				`https://api.twitter.com/2/users/${id}/followers?max_results=500${ paginationToken ? `&pagination_token=${paginationToken}` : ''}`,
+				`https://api.twitter.com/2/users/${id}/followers?max_results=500${paginationToken ? `&pagination_token=${paginationToken}` : ''}`,
 				{
 					headers: {
 						'Authorization': 'Bearer ' + this.bearerTokens.access_token
@@ -123,7 +123,7 @@ class TwitterClient {
 
 				// 余裕を持って1秒ほど余分に待つ
 				const waitTimeMilliSeconds = Number(rateLimitResetAt) * 1000 - Date.now() + 1000;
-				log('error', `faced to rate limit. wait for ${ waitTimeMilliSeconds } ms.`);
+				log('error', `faced to rate limit. wait for ${waitTimeMilliSeconds} ms.`);
 				Utilities.sleep(waitTimeMilliSeconds);
 				continue;
 			} else if (response.getResponseCode() !== 200) {
@@ -153,7 +153,7 @@ function setTrigger() {
 
 async function fetchFollowers() {
 	const now = new Date();
-	const date = `${ now.getFullYear().toString().padStart(4, '0') }-${ (now.getMonth() + 1).toString().padStart(2, '0') }-${ now.getDate().toString().padStart(2, '0') }`;
+	const date = `${now.getFullYear().toString().padStart(4, '0')}-${(now.getMonth() + 1).toString().padStart(2, '0')}-${now.getDate().toString().padStart(2, '0')}`;
 
 	const twitterClient = new TwitterClient(
 		TWITTER_API_KEY,
@@ -238,7 +238,7 @@ function getFollowerDiff(id: string, from: string, to: string): GetFollowerDiffI
 	const result: GetFollowerDiffItem[] = [];
 
 	toFollowers.forEach(follower => {
-		if(!fromFollowerIds.has(follower.twitterId)) {
+		if (!fromFollowerIds.has(follower.twitterId)) {
 			result.push({
 				twitterId: follower.twitterId,
 				diff: '+',
@@ -249,7 +249,7 @@ function getFollowerDiff(id: string, from: string, to: string): GetFollowerDiffI
 	});
 
 	fromFollowers.forEach(follower => {
-		if(!toFollowerIds.has(follower.twitterId)) {
+		if (!toFollowerIds.has(follower.twitterId)) {
 			result.push({
 				twitterId: follower.twitterId,
 				diff: '-',
@@ -263,51 +263,60 @@ function getFollowerDiff(id: string, from: string, to: string): GetFollowerDiffI
 }
 
 function getFollowersAt(sheet: GoogleAppsScript.Spreadsheet.Sheet, date: string): Follower[] {
-	let minIndex = 2;
-	let maxIndex = sheet.getLastRow();
-	let found = false;
+	const minIndex = 2;
+	const maxIndex = sheet.getLastRow();
+	// let found = false;
 
-	while (minIndex < maxIndex) {
-		const c = minIndex + (maxIndex - minIndex) / 2;
-		const d = sheet.getRange(c, 2).getDisplayValue();
+	// while (minIndex < maxIndex) {
+	// 	const c = minIndex + (maxIndex - minIndex) / 2;
+	// 	const d = sheet.getRange(c, 2).getDisplayValue();
 
-		if (d < date) {
-			minIndex = c + 1;
-		} else if (d === date) {
-			maxIndex = c;
-			found = true;
-		} else {
-			maxIndex = c - 1;
-		}
-	}
+	// 	if (d < date) {
+	// 		minIndex = c + 1;
+	// 	} else if (d === date) {
+	// 		maxIndex = c;
+	// 		found = true;
+	// 	} else {
+	// 		maxIndex = c - 1;
+	// 	}
+	// }
 
 	let result: Follower[] = [];
 
-	if (found) {
-		const rangeMinIndex = minIndex;
-		minIndex = 2;
-		maxIndex = sheet.getLastRow();
-		found = false;
+	// if (found) {
+	// 	const rangeMinIndex = minIndex;
+	// 	minIndex = 2;
+	// 	maxIndex = sheet.getLastRow();
+	// 	found = false;
 
-		while (minIndex < maxIndex) {
-			const c = minIndex + (maxIndex - minIndex) / 2;
-			const d = sheet.getRange(c, 2).getDisplayValue();
+	// 	while (minIndex < maxIndex) {
+	// 		const c = minIndex + (maxIndex - minIndex) / 2;
+	// 		const d = sheet.getRange(c, 2).getDisplayValue();
 
-			if (d < date) {
-				minIndex = c + 1;
-			} else if (d === date) {
-				minIndex = c;
-				found = true;
-			} else {
-				maxIndex = c - 1;
-			}
-		}
+	// 		if (d < date) {
+	// 			minIndex = c + 1;
+	// 		} else if (d === date) {
+	// 			minIndex = c;
+	// 			found = true;
+	// 		} else {
+	// 			maxIndex = c - 1;
+	// 		}
+	// 	}
 
-		const rangeMaxIndex = minIndex;
+	// 	const rangeMaxIndex = minIndex;
 
-		const rows = sheet.getRange(rangeMinIndex, 1, rangeMaxIndex - rangeMinIndex + 1, 4).getDisplayValues();
-		result = rows.map(row => Follower.fromRow(row));
+	const textFinder = sheet.getRange(minIndex, 2, maxIndex - minIndex + 1, 1).createTextFinder(date);
+	const indices = textFinder.findAll().map(cell => cell.getRowIndex());
+
+	if (indices.length === 0) {
+		return result;
 	}
+
+	const rangeMinIndex = Math.min(...indices);
+	const rangeMaxIndex = Math.max(...indices);
+
+	const rows = sheet.getRange(rangeMinIndex, 1, rangeMaxIndex - rangeMinIndex + 1, 4).getDisplayValues();
+	result = rows.map(row => Follower.fromRow(row));
 
 	return result;
 }
@@ -361,7 +370,7 @@ function execGetFollowerDiffApi(params: Record<string, string>) {
 		}
 
 		throw Error('unknown error');
-	} catch(e) {
+	} catch (e) {
 		if (e instanceof Error) {
 			return ({
 				status: 500,
@@ -382,30 +391,17 @@ function doGet(request: Request) {
 	const jobUuid = Utilities.getUuid();
 	const path = request.pathInfo;
 
-	log('info', `[${ jobUuid }] GET ${ path }: begin.`);
+	log('info', `[${jobUuid}] GET ${path}: begin.`);
 
-	let result = null;
-
-	switch(path) {
-		case 'followers/diff': {
-			result = execGetFollowerDiffApi(request.parameter);
-			break;
-		}
-		default: {
-			result = ({
-				status: 404
-			});
-			break;
-		}
-	}
+	const result = execGetFollowerDiffApi(request.parameter);
 
 	if (result?.status) {
 		if (result.status === 200) {
-			log('info', `[${ jobUuid }] GET ${ path }: finished with status 200.`);
+			log('info', `[${jobUuid}] GET ${path}: finished with status 200.`);
 		} else if (result.status < 500) {
-			log('info', `[${ jobUuid }] GET ${ path }: finished with status ${ result.status }.`);
+			log('info', `[${jobUuid}] GET ${path}: finished with status ${result.status}.`);
 		} else {
-			log('error', `[${ jobUuid }] GET ${ path }: finished with status ${ result.status }. response: ${ JSON.stringify(result) }`);
+			log('error', `[${jobUuid}] GET ${path}: finished with status ${result.status}. response: ${JSON.stringify(result)}`);
 		}
 	}
 
